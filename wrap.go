@@ -18,8 +18,8 @@ func Wrap(db DBTX) DBTX {
 
 type DBTX interface {
 	Exec(context.Context, string, ...interface{}) (pgconn.CommandTag, error)
-	Query(context.Context, string, ...interface{}) (*pgx.Rows, error)
-	QueryRow(context.Context, string, ...interface{}) *pgx.Row
+	Query(context.Context, string, ...interface{}) (pgx.Rows, error)
+	QueryRow(context.Context, string, ...interface{}) pgx.Row
 }
 
 type wrappedDB struct {
@@ -37,7 +37,7 @@ func (w *wrappedDB) Exec(ctx context.Context, query string, args ...interface{})
 	return w.DBTX.Exec(ctx, query, args...)
 }
 
-func (w *wrappedDB) Query(ctx context.Context, query string, args ...interface{}) (*pgx.Rows, error) {
+func (w *wrappedDB) Query(ctx context.Context, query string, args ...interface{}) (pgx.Rows, error) {
 	var err error
 	if b, ok := BuilderFrom(ctx); ok {
 		query, args, err = b.Build(query, args...)
@@ -48,7 +48,7 @@ func (w *wrappedDB) Query(ctx context.Context, query string, args ...interface{}
 	return w.DBTX.Query(ctx, query, args...)
 }
 
-func (w *wrappedDB) QueryRow(ctx context.Context, query string, args ...interface{}) *pgx.Row {
+func (w *wrappedDB) QueryRow(ctx context.Context, query string, args ...interface{}) pgx.Row {
 	var err error
 	if b, ok := BuilderFrom(ctx); ok {
 		if queryNew, argsNew, err := b.Build(query, args...); err == nil {
