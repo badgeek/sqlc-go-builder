@@ -2,7 +2,6 @@ package sqlc
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 
 	"github.com/jackc/pgx/v5"
@@ -18,17 +17,16 @@ func Wrap(db DBTX) DBTX {
 }
 
 type DBTX interface {
-	ExecContext(context.Context, string, ...interface{}) (pgconn.CommandTag, error)
-	PrepareContext(context.Context, string) (*sql.Stmt, error)
-	QueryContext(context.Context, string, ...interface{}) (*pgx.Rows, error)
-	QueryRowContext(context.Context, string, ...interface{}) *pgx.Row
+	Exec(context.Context, string, ...interface{}) (pgconn.CommandTag, error)
+	Query(context.Context, string, ...interface{}) (*pgx.Rows, error)
+	QueryRow(context.Context, string, ...interface{}) *pgx.Row
 }
 
 type wrappedDB struct {
 	DBTX
 }
 
-func (w *wrappedDB) ExecContext(ctx context.Context, query string, args ...interface{}) (pgconn.CommandTag, error) {
+func (w *wrappedDB) Exec(ctx context.Context, query string, args ...interface{}) (pgconn.CommandTag, error) {
 	var err error
 	if b, ok := BuilderFrom(ctx); ok {
 		query, args, err = b.Build(query, args...)
@@ -36,14 +34,10 @@ func (w *wrappedDB) ExecContext(ctx context.Context, query string, args ...inter
 	if err != nil {
 		return pgconn.CommandTag{}, errors.Wrap(err, "could not build query")
 	}
-	return w.DBTX.ExecContext(ctx, query, args...)
+	return w.DBTX.Exec(ctx, query, args...)
 }
 
-func (w *wrappedDB) PrepareContext(ctx context.Context, query string) (*sql.Stmt, error) {
-	return w.DBTX.PrepareContext(ctx, query)
-}
-
-func (w *wrappedDB) QueryContext(ctx context.Context, query string, args ...interface{}) (*pgx.Rows, error) {
+func (w *wrappedDB) Query(ctx context.Context, query string, args ...interface{}) (*pgx.Rows, error) {
 	var err error
 	if b, ok := BuilderFrom(ctx); ok {
 		query, args, err = b.Build(query, args...)
@@ -51,10 +45,10 @@ func (w *wrappedDB) QueryContext(ctx context.Context, query string, args ...inte
 	if err != nil {
 		return nil, errors.Wrap(err, "could not build query")
 	}
-	return w.DBTX.QueryContext(ctx, query, args...)
+	return w.DBTX.Query(ctx, query, args...)
 }
 
-func (w *wrappedDB) QueryRowContext(ctx context.Context, query string, args ...interface{}) *pgx.Row {
+func (w *wrappedDB) QueryRow(ctx context.Context, query string, args ...interface{}) *pgx.Row {
 	var err error
 	if b, ok := BuilderFrom(ctx); ok {
 		if queryNew, argsNew, err := b.Build(query, args...); err == nil {
@@ -65,5 +59,5 @@ func (w *wrappedDB) QueryRowContext(ctx context.Context, query string, args ...i
 	if err != nil {
 		fmt.Printf("could not build query: %s", err)
 	}
-	return w.DBTX.QueryRowContext(ctx, query, args...)
+	return w.DBTX.QueryRow(ctx, query, args...)
 }
