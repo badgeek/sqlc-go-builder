@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	sqlc "github.com/projectdiscovery/sqlc-go-builder"
+	sqlc "github.com/badgeek/sqlc-go-builder"
 )
 
 func main() {

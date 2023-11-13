@@ -21,7 +21,7 @@ package main
 import (
 	"fmt"
 
-	sqlc "github.com/projectdiscovery/sqlc-go-builder"
+	sqlc "github.com/badgeek/sqlc-go-builder"
 )
 
 func main() {
@@ -58,7 +58,7 @@ import (
 
 	v2 "github.com/test-repo/pkg/db/v2"
 	"github.com/test-repo/pkg/db/v2/dbsql"
-	sqlc "github.com/projectdiscovery/sqlc-go-builder"
+	sqlc "github.com/badgeek/sqlc-go-builder"
 )
 
 func TestPaginationDynamic(t *testing.T) {
